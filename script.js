@@ -1,3 +1,19 @@
+// Release the loading overlay after the initial load; never block the site indefinitely.
+(function () {
+  const root = document.documentElement;
+  const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let released = false;
+  const release = () => {
+    if (released) return;
+    released = true;
+    root.classList.remove('js-loading');
+  };
+  const releaseOnLoad = () => window.setTimeout(release, reducedMotion ? 0 : 650);
+  if (document.readyState === 'complete') releaseOnLoad();
+  else window.addEventListener('load', releaseOnLoad, { once: true });
+  window.setTimeout(release, reducedMotion ? 750 : 3000);
+})();
+
 const links=[...document.querySelectorAll('.navlinks a')];
 const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.hash==='#'+entry.target.id));}}},{rootMargin:'-15% 0px -65% 0px'});
 document.querySelectorAll('section[id]').forEach(section=>observer.observe(section));
